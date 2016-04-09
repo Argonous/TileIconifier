@@ -28,10 +28,14 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using TileIconifier.Core.Properties;
+using TileIconifier.Core.Utilities;
 
 namespace TileIconifier.Core.Custom.WindowsStoreShellMethod
 {
-    public class WindowsStoreApp :IEqualityComparer<WindowsStoreApp>
+    public class WindowsStoreApp : ICustomBaseItem, IEqualityComparer<WindowsStoreApp>
     {
         public WindowsStoreApp(string displayName, string logoPath, string appUserModelId)
         {
@@ -42,7 +46,29 @@ namespace TileIconifier.Core.Custom.WindowsStoreShellMethod
 
         public string DisplayName { get; }
         public string LogoPath { get; }
+        public CustomShortcutType ShortcutType => CustomShortcutType.WindowsStoreApp;
+
+        public byte[] IconAsBytes
+        {
+            get
+            {
+                if (LogoPath == null) return null;
+
+                try
+                {
+                    using (var readImage = new FileStream(LogoPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                        return ImageUtils.ImageToByteArray(new Bitmap(readImage));
+                }
+                catch
+                {
+                    // ignored
+                }
+                return null;
+            }
+        }
+
         public string AppUserModelId { get; }
+        public string ExecutionArgument => $@"shell:AppsFolder\{AppUserModelId}";
 
         public bool Equals(WindowsStoreApp x, WindowsStoreApp y)
         {

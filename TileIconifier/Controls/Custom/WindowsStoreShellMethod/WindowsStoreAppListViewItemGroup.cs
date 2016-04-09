@@ -30,24 +30,18 @@
 using System;
 using System.Runtime.Serialization;
 using System.Windows.Forms;
+using TileIconifier.Controls.Custom.Cache;
+using TileIconifier.Core.Custom;
 using TileIconifier.Core.Custom.WindowsStoreShellMethod;
+using TileIconifier.Core.Shortcut;
 
 namespace TileIconifier.Controls.Custom.WindowsStoreShellMethod
 {
-    [Serializable]
-    public class WindowsStoreAppListViewItemGroup : ListViewItem
+    public class WindowsStoreAppListViewItemGroup : BaseCustomListViewItem<WindowsStoreApp>
     {
-        protected WindowsStoreAppListViewItemGroup(SerializationInfo info, StreamingContext context)
-            : base(info, context)
+        public WindowsStoreAppListViewItemGroup(WindowsStoreApp windowsStoreApp) : base(windowsStoreApp)
         {
+            Text = BaseItem.DisplayName;
         }
-
-        public WindowsStoreAppListViewItemGroup(WindowsStoreApp windowsStoreApp)
-        {
-            WindowsStoreApp = windowsStoreApp;
-            Text = windowsStoreApp.DisplayName;
-        }
-
-        public WindowsStoreApp WindowsStoreApp { get; }
     }
 }

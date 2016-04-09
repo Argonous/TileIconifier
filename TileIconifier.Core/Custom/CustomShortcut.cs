@@ -52,7 +52,7 @@ namespace TileIconifier.Core.Custom
             string vbsFolderPath = null)
         {
             ShortcutName = shortcutName.CleanInvalidFilenameChars();
-            ShortcutItem = new ShortcutItem(shortcutPath);
+            ShortcutPath = shortcutPath;
             TargetPath = targetPath;
             TargetArguments = targetArguments;
             ShortcutType = shortcutType;
@@ -74,11 +74,10 @@ namespace TileIconifier.Core.Custom
         {
             var vbsFolderPath =
                 DirectoryUtils.GetUniqueDirName(CustomShortcutGetters.CustomShortcutVbsPath + shortcutName) + "\\";
-            var shortcutPath = $"{shortcutRootFolder}{new DirectoryInfo(vbsFolderPath).Name}\\{shortcutName}.lnk";
+            ShortcutPath = $"{shortcutRootFolder}{new DirectoryInfo(vbsFolderPath).Name}\\{shortcutName}.lnk";
 
 
             ShortcutName = shortcutName.CleanInvalidFilenameChars();
-            ShortcutItem = new ShortcutItem(shortcutPath);
             TargetPath = targetPath;
             TargetArguments = targetArguments;
             ShortcutType = shortcutType;
@@ -91,12 +90,12 @@ namespace TileIconifier.Core.Custom
             if (basicIconToUse != null && File.Exists(basicIconToUse)) BasicShortcutIcon = basicIconToUse;
         }
 
-        public ShortcutItem ShortcutItem { get; set; }
+        public string ShortcutPath { get; set; }
         private string VbsFilePath { get; set; }
         private string VbsFolderPath { get; }
         public string ShortcutName { get; }
-        private string TargetPath { get; }
-        private string TargetArguments { get; }
+        public string TargetPath { get; }
+        public string TargetArguments { get; }
         private string WorkingFolder { get; }
         public CustomShortcutType ShortcutType { get; }
         public WindowType WindowType { get; set; }
@@ -139,14 +138,14 @@ namespace TileIconifier.Core.Custom
             File.WriteAllText(VbsFilePath,
                 string.Format(Resources.CustomShortcutVbsTemplate,
                     ShortcutName.EscapeVba(),
-                    ShortcutItem.ShortcutFileInfo.FullName.EscapeVba(),
+                    ShortcutPath.EscapeVba(),
                     TargetPath.QuoteWrap().EscapeVba(),
                     TargetArguments.EscapeVba(),
                     ShortcutType,
                     (int) WindowType
                     ));
 
-            ShortcutUtils.CreateLnkFile(ShortcutItem.ShortcutFileInfo.FullName, VbsFilePath,
+            ShortcutUtils.CreateLnkFile(ShortcutPath, VbsFilePath,
                 ShortcutName + " shortcut created by TileIconifier",
                 iconPath: BasicShortcutIcon,
                 workingDirectory: WorkingFolder
@@ -155,11 +154,12 @@ namespace TileIconifier.Core.Custom
 
         public void Delete()
         {
-            if (ShortcutItem.ShortcutFileInfo.Directory != null && ShortcutItem.ShortcutFileInfo.Directory.Exists)
+            var shortcutFileInfo = new FileInfo(ShortcutPath);
+            if (shortcutFileInfo.Directory != null && shortcutFileInfo.Directory.Exists)
             {
                 try
                 {
-                    ShortcutItem.ShortcutFileInfo.Directory.Delete(true);
+                    shortcutFileInfo.Directory.Delete(true);
                 }
                 catch
                 {

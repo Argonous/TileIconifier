@@ -69,12 +69,10 @@ namespace TileIconifier.Core.Custom.Chrome
                 let chromeIconPaths = chromeAppDir.GetFiles(@"*.ico")
                 from chromeIconPath in chromeIconPaths
                 where chromeIconPath != null && CustomShortcutGetters.ExcludedChromeAppIds.All(s => s != chromeAppId)
-                select new ChromeApp
-                {
-                    AppId = chromeAppId,
-                    AppName = Path.GetFileNameWithoutExtension(chromeIconPath.Name),
-                    IconPath = chromeIconPath.FullName
-                }).ToList();
+                select
+                    new ChromeApp(chromeAppId, Path.GetFileNameWithoutExtension(chromeIconPath.Name),
+                        chromeIconPath.FullName
+                        )).ToList();
         }
     }
 }

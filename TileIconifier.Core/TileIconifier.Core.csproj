@@ -41,6 +41,7 @@
       <HintPath>..\packages\System.Management.Automation.6.1.7601.17515\lib\net45\System.Management.Automation.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -55,6 +56,10 @@
     <Compile Include="Custom\CustomShortcut.cs" />
     <Compile Include="Custom\CustomShortcutExtensionMethods.cs" />
     <Compile Include="Custom\CustomShortcutGetters.cs" />
+    <Compile Include="Custom\CustomShortcutLibrary.cs" />
+    <Compile Include="Custom\Explorer\ExplorerCommonLibrary.cs" />
+    <Compile Include="Custom\Explorer\ExplorerItem.cs" />
+    <Compile Include="Custom\CustomBaseItem.cs" />
     <Compile Include="Custom\NewCustomShortcutFormCache.cs" />
     <Compile Include="Custom\Steam\KeyValues\KeyValues.cs" />
     <Compile Include="Custom\Steam\KeyValues\KeyValues_Data.cs" />

@@ -28,6 +28,7 @@
 #endregion
 
 using System.IO;
+using TileIconifier.Core.Custom;
 
 namespace TileIconifier.Core.Utilities
 {
@@ -46,6 +47,15 @@ namespace TileIconifier.Core.Utilities
 
                 dir = sourcefolder + "_" + i;
             }
+        }
+
+        public static ShortcutUser GetShortcutUserType(string shortcutPath)
+        {
+            if (shortcutPath.StartsWith(CustomShortcutGetters.CustomShortcutAllUsersPath))
+                return ShortcutUser.AllUsers;
+            if (shortcutPath.StartsWith(CustomShortcutGetters.CustomShortcutCurrentUserPath))
+                return ShortcutUser.CurrentUser;
+            return ShortcutUser.Unknown;
         }
     }
 }

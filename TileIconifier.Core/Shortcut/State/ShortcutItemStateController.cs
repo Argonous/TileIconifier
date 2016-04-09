@@ -42,6 +42,11 @@ namespace TileIconifier.Core.Shortcut.State
         public bool HasUnsavedChanges => !CurrentState.Equals(OldState);
         public bool ForegroundTextColourChanged => CurrentState.ForegroundText != OldState.ForegroundText;
 
+        public ShortcutItemStateController()
+        {
+            ResetParameters();
+        }
+
         public void SaveMediumIconMetadata(string filePath)
         {
             CurrentState.MediumImage.Save(filePath);
@@ -79,60 +84,55 @@ namespace TileIconifier.Core.Shortcut.State
         internal void LoadParameters(bool loadFromFile, string visualElementsManifestPath,
             string mediumImageResizeMetadataPath, string smallImageResizeMetadataPath, string targetFolderPath)
         {
-            if (loadFromFile)
+            if (!loadFromFile) return;
+
+            var xmlDoc = XDocument.Load(visualElementsManifestPath);
+
+            try
             {
-                var xmlDoc = XDocument.Load(visualElementsManifestPath);
-
-                try
+                ShortcutItemImage mediumImage = null;
+                ShortcutItemImage smallImage = null;
+                if (File.Exists(mediumImageResizeMetadataPath))
                 {
-                    ShortcutItemImage mediumImage = null;
-                    ShortcutItemImage smallImage = null;
-                    if (File.Exists(mediumImageResizeMetadataPath))
-                    {
-                        mediumImage = ShortcutItemImage.Load(mediumImageResizeMetadataPath);
-                    }
-                    if (File.Exists(smallImageResizeMetadataPath))
-                    {
-                        smallImage = ShortcutItemImage.Load(smallImageResizeMetadataPath);
-                    }
-
-                    var parameters = from b in xmlDoc.Descendants("VisualElements")
-                        select new ShortcutIconState
-                        {
-                            BackgroundColor = b.Attribute("BackgroundColor").Value,
-                            ForegroundText = b.Attribute("ForegroundText").Value,
-                            ShowNameOnSquare150X150Logo = b.Attribute("ShowNameOnSquare150x150Logo").Value == "on",
-                            MediumImage =
-                                mediumImage ?? new ShortcutItemImage(ShortcutConstantsAndEnums.MediumShortcutSize)
-                                {
-                                    Bytes =
-                                        ImageUtils.LoadFileToByteArray(targetFolderPath +
-                                                                       b.Attribute("Square150x150Logo").Value),
-                                    X = 0,
-                                    Y = 0
-                                },
-                            SmallImage =
-                                smallImage ?? new ShortcutItemImage(ShortcutConstantsAndEnums.SmallShortcutSize)
-                                {
-                                    Bytes =
-                                        ImageUtils.LoadFileToByteArray(targetFolderPath +
-                                                                       b.Attribute("Square70x70Logo").Value),
-                                    X = 0,
-                                    Y = 0
-                                }
-                        };
-
-                    OldState = parameters.Single();
-                    CurrentState = OldState.Clone();
+                    mediumImage = ShortcutItemImage.Load(mediumImageResizeMetadataPath);
                 }
-                catch
+                if (File.Exists(smallImageResizeMetadataPath))
                 {
-                    ResetParameters();
+                    smallImage = ShortcutItemImage.Load(smallImageResizeMetadataPath);
                 }
+
+                var parameters = from b in xmlDoc.Descendants("VisualElements")
+                                 select new ShortcutIconState
+                                 {
+                                     BackgroundColor = b.Attribute("BackgroundColor").Value,
+                                     ForegroundText = b.Attribute("ForegroundText").Value,
+                                     ShowNameOnSquare150X150Logo = b.Attribute("ShowNameOnSquare150x150Logo").Value == "on",
+                                     MediumImage =
+                                         mediumImage ?? new ShortcutItemImage(ShortcutConstantsAndEnums.MediumShortcutSize)
+                                         {
+                                             Bytes =
+                                                 ImageUtils.LoadFileToByteArray(targetFolderPath +
+                                                                                b.Attribute("Square150x150Logo").Value),
+                                             X = 0,
+                                             Y = 0
+                                         },
+                                     SmallImage =
+                                         smallImage ?? new ShortcutItemImage(ShortcutConstantsAndEnums.SmallShortcutSize)
+                                         {
+                                             Bytes =
+                                                 ImageUtils.LoadFileToByteArray(targetFolderPath +
+                                                                                b.Attribute("Square70x70Logo").Value),
+                                             X = 0,
+                                             Y = 0
+                                         }
+                                 };
+
+                OldState = parameters.Single();
+                CurrentState = OldState.Clone();
             }
-            else
+            catch
             {
-                ResetParameters();
+                // ignore
             }
         }
     }

@@ -33,12 +33,16 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using TileIconifier.Controls;
+using TileIconifier.Controls.Custom.Cache;
 using TileIconifier.Controls.Custom.Chrome;
+using TileIconifier.Controls.Custom.Explorer;
 using TileIconifier.Controls.Custom.Steam;
 using TileIconifier.Controls.Custom.WindowsStoreShellMethod;
 using TileIconifier.Core;
 using TileIconifier.Core.Custom;
 using TileIconifier.Core.Custom.Chrome;
+using TileIconifier.Core.Custom.Explorer;
 using TileIconifier.Core.Custom.Steam;
 using TileIconifier.Core.Custom.WindowsStoreShellMethod;
 using TileIconifier.Core.IconExtractor;
@@ -57,33 +61,34 @@ namespace TileIconifier.Forms.CustomShortcutForms
         // CHROME RELATED FIELDS
         //*********************************************************************
 
-        private readonly NewCustomShortcutFormCache _chromeCache = new NewCustomShortcutFormCache();
+        private CachedShortcutItem _chromeCache = new CachedShortcutItem();
         private List<ChromeAppListViewItem> _chromeApps;
 
         //*********************************************************************
         // EXPLORER RELATED FIELDS
         //*********************************************************************
 
-        private readonly NewCustomShortcutFormCache _explorerCache = new NewCustomShortcutFormCache();
+        private CachedShortcutItem _explorerCache = new CachedShortcutItem();
+        private readonly ExplorerComboBoxItem _explorerCustomItem = new ExplorerComboBoxItem(new ExplorerItem("",""));
 
         //*********************************************************************
         // OTHER RELATED FIELDS
         //*********************************************************************
 
-        private readonly NewCustomShortcutFormCache _otherCache = new NewCustomShortcutFormCache();
+        private CachedShortcutItem _otherCache = new CachedShortcutItem();
 
         //*********************************************************************
         // STEAM RELATED FIELDS
         //*********************************************************************
 
-        private readonly NewCustomShortcutFormCache _steamCache = new NewCustomShortcutFormCache();
+        private CachedShortcutItem _steamCache = new CachedShortcutItem();
         private List<SteamGameListViewItem> _steamGames;
 
         //*********************************************************************
         // WINDOWS STORE RELATED FIELDS
         //*********************************************************************
 
-        private readonly NewCustomShortcutFormCache _windowsStoreCache = new NewCustomShortcutFormCache();
+        private CachedShortcutItem _windowsStoreCache = new CachedShortcutItem();
         private List<WindowsStoreAppListViewItemGroup> _windowsStoreApps;
 
         //*********************************************************************
@@ -101,27 +106,35 @@ namespace TileIconifier.Forms.CustomShortcutForms
         {
             InitializeComponent();
             _previousTabPage = tabShortcutType.SelectedTab;
+            radShortcutLocation.OnRadioButtonCheckedChange +=
+                (sender, args) => { CurrentCache.ShortcutUser = ((AllOrCurrentUserRadios)sender).GetCheckedRadio(); };
+        }
+
+        protected override void ApplySkin(object sender, EventArgs e)
+        {
+            base.ApplySkin(sender, e);
+            iconifierPanel.UpdateSkinColors(CurrentBaseSkin);
         }
 
         private NewCustomShortcutFormCache PreviousCache
         {
             get
             {
-                if (_previousTabPage == tabExplorer)
-                    return _explorerCache;
-                if (_previousTabPage == tabSteam)
-                    return _steamCache;
-                if (_previousTabPage == tabOther)
-                    return _otherCache;
-                if (_previousTabPage == tabWindowsStore)
-                    return _windowsStoreCache;
-                if (_previousTabPage == tabChromeApps)
-                    return _chromeCache;
+                //if (_previousTabPage == tabExplorer)
+                //    return _explorerCache;
+                //if (_previousTabPage == tabSteam)
+                //    return _steamCache;
+                //if (_previousTabPage == tabOther)
+                //    return _otherCache;
+                //if (_previousTabPage == tabWindowsStore)
+                //    return _windowsStoreCache;
+                //if (_previousTabPage == tabChromeApps)
+                //    return _chromeCache;
                 return null;
             }
         }
 
-        private NewCustomShortcutFormCache CurrentCache
+        private CachedShortcutItem CurrentCache
         {
             get
             {
@@ -137,6 +150,20 @@ namespace TileIconifier.Forms.CustomShortcutForms
                 if (currentTab == tabChromeApps)
                     return _chromeCache;
                 return null;
+            }
+            set
+            {
+                var currentTab = tabShortcutType.SelectedTab;
+                if (currentTab == tabExplorer)
+                    _explorerCache = value;
+                if (currentTab == tabSteam)
+                    _steamCache = value;
+                if (currentTab == tabOther)
+                    _otherCache = value;
+                if (currentTab == tabWindowsStore)
+                    _windowsStoreCache = value;
+                if (currentTab == tabChromeApps)
+                    _chromeCache = value;
             }
         }
 
@@ -163,16 +190,27 @@ namespace TileIconifier.Forms.CustomShortcutForms
             WindowType windowType = WindowType.ActiveAndDisplayed
             )
         {
-            var shortcutName = txtShortcutName.Text.CleanInvalidFilenameChars();
-            byte[] imageToUse;
-
+            var shortcutName = CurrentCache.ShortcutName;
             try
             {
-                ValidateFields(shortcutName, targetPath, out imageToUse);
+                ValidateFields(shortcutName, targetPath);
             }
             catch (ValidationFailureException)
             {
                 return;
+            }
+
+            if (CurrentCache.PreviousCustomShortcut != null)
+            {
+                var msgboxResult =
+                    MessageBox.Show(
+                        @"You have already made a shortcut for this item in this session! Would you like to overwrite it? (Yes to overwrite, No to create another",
+                        shortcutName, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+                if (msgboxResult == DialogResult.Yes)
+                {
+                    CurrentCache.PreviousCustomShortcut.Delete();
+                } else if (msgboxResult == DialogResult.Cancel)
+                    return;
             }
 
             //build our new custom shortcut
@@ -181,28 +219,29 @@ namespace TileIconifier.Forms.CustomShortcutForms
 
             //If we didn't specify a shortcut icon path, make one
             if (basicShortcutIcon == null)
-                customShortcut.BuildCustomShortcut(pctCurrentIcon.Image);
+                customShortcut.BuildCustomShortcut();//pctCurrentIcon.Image);
             else
                 customShortcut.BuildCustomShortcut();
 
+            CurrentCache.PreviousCustomShortcut = customShortcut;
 
             //Iconify a TileIconifier shortcut for this with default settings
-            var newShortcutItem = customShortcut.ShortcutItem;
-            newShortcutItem.Properties.CurrentState.MediumImage.SetImage(imageToUse,
-                ShortcutConstantsAndEnums.MediumShortcutSize);
-            newShortcutItem.Properties.CurrentState.SmallImage.SetImage(imageToUse,
-                ShortcutConstantsAndEnums.SmallShortcutSize);
-            var iconify = new TileIcon(newShortcutItem);
+            CurrentCache.ShortcutItem.ShortcutFileInfo = new FileInfo(customShortcut.ShortcutPath);
+            var iconify = new TileIcon(CurrentCache.ShortcutItem);
             iconify.RunIconify();
+
+            CurrentCache.ShortcutItem.Properties.CommitChanges();
 
             //confirm to the user the shortcut has been created
             MessageBox.Show(
                 $"A shortcut for {shortcutName.QuoteWrap()} has been created in your start menu under TileIconify. The item will need to be pinned manually.",
                 @"Shortcut created!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            iconifierPanel.UpdateControlsToShortcut();
         }
 
         //Hacked this in quickly - fix it up.
-        private void ValidateFields(string shortcutName, string targetPath, out byte[] imageToUse)
+        private void ValidateFields(string shortcutName, string targetPath)
         {
             //Check if there are invalid characters in the shortcut name
             if (txtShortcutName.Text != shortcutName || shortcutName.Length == 0)
@@ -219,22 +258,8 @@ namespace TileIconifier.Forms.CustomShortcutForms
                 throw new ValidationFailureException();
             }
 
-            if (pctCurrentIcon.Image == null)
+            if (!iconifierPanel.DoValidation())
             {
-                MessageBox.Show(@"No icon has been selected!", @"Please select an icon", MessageBoxButtons.OK,
-                    MessageBoxIcon.Exclamation);
-                throw new ValidationFailureException();
-            }
-
-            try
-            {
-                imageToUse = ImageUtils.ImageToByteArray(pctCurrentIcon.Image);
-            }
-            catch
-            {
-                MessageBox.Show(
-                    @"An issue occurred with the image selected. Please load the icon again or try another.",
-                    @"Icon error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 throw new ValidationFailureException();
             }
         }
@@ -265,14 +290,14 @@ namespace TileIconifier.Forms.CustomShortcutForms
 
         private void pctCurrentIcon_Click(object sender, EventArgs e)
         {
-            try
-            {
-                CurrentCache.SetIconBytes(FrmIconSelector.GetImage(this, CustomShortcutGetters.ExplorerPath));
-                pctCurrentIcon.Image = CurrentCache.GetIcon();
-            }
-            catch (UserCancellationException)
-            {
-            }
+            //////try
+            //////{
+            //////    CurrentCache.SetIconBytes(FrmIconSelector.GetImage(this, CustomShortcutGetters.ExplorerPath));
+            //////    pctCurrentIcon.Image = CurrentCache.GetIcon();
+            //////}
+            //////catch (UserCancellationException)
+            //////{
+            //////}
         }
 
         private void tabShortcutType_SelectedIndexChanged(object sender, EventArgs e)
@@ -284,26 +309,29 @@ namespace TileIconifier.Forms.CustomShortcutForms
             _previousTabPage = tabShortcutType.SelectedTab;
 
             //load the cache of the new tab
-            LoadCache(CurrentCache);
+            LoadCache();
         }
 
-        private void LoadCache(NewCustomShortcutFormCache cache)
+        private void LoadCache()
         {
-            pctCurrentIcon.Image = cache.GetIcon();
-            txtShortcutName.Text = cache.ShortcutName;
-            radShortcutLocation.SetCheckedRadio(cache.AllOrCurrentUser);
+            //pctCurrentIcon.Image = cache.GetIcon();
+            txtShortcutName.Text = CurrentCache.ShortcutName;
+            radShortcutLocation.SetCheckedRadio(CurrentCache.ShortcutUser);
+            iconifierPanel.CurrentShortcutItem = CurrentCache.ShortcutItem;
+
+            iconifierPanel.UpdateControlsToShortcut();
         }
 
         private void SaveCache(NewCustomShortcutFormCache cache)
         {
-            cache.ShortcutName = txtShortcutName.Text;
-            cache.AllOrCurrentUser = radShortcutLocation.GetCheckedRadio();
+            //cache.ShortcutName = txtShortcutName.Text;
+            //cache.AllOrCurrentUser = radShortcutLocation.GetCheckedRadio();
         }
 
         private void UpdatedCacheIcon(byte[] bytesIn)
         {
-            CurrentCache.SetIconBytes(bytesIn);
-            pctCurrentIcon.Image = CurrentCache.GetIcon();
+            //////CurrentCache.SetIconBytes(bytesIn);
+            //////pctCurrentIcon.Image = CurrentCache.GetIcon();
         }
 
         #region Explorer Methods
@@ -316,25 +344,37 @@ namespace TileIconifier.Forms.CustomShortcutForms
         {
             Invoke(new Action(() =>
             {
-                cmbExplorerGuids.DisplayMember = "Key";
-                cmbExplorerGuids.ValueMember = "Value";
-                cmbExplorerGuids.DataSource = new BindingSource(CustomShortcutGetters.ExplorerGuids, null);
-                CurrentCache.SetIconBytes(ImageUtils.ImageToByteArray(Resources.ExplorerIco.ToBitmap()));
-                pctCurrentIcon.Image = CurrentCache.GetIcon();
+                var explorerItems = ExplorerCommonLibrary.GetAllItems();
+                foreach (var explorerItem in explorerItems.Select(e => new ExplorerComboBoxItem(e)))
+                    cmbExplorerGuids.Items.Add(explorerItem);
             }));
+
+
+            //    cmbExplorerGuids.DisplayMember = "Key";
+            //    cmbExplorerGuids.ValueMember = "Value";
+            //    cmbExplorerGuids.DataSource = new BindingSource(CustomShortcutGetters.ExplorerGuids, null);
+            //    ////CurrentCache.SetIconBytes(ImageUtils.ImageToByteArray(Resources.ExplorerIco.ToBitmap()));
+            //    ////pctCurrentIcon.Image = CurrentCache.GetIcon();
+            //}));
         }
 
         private void radSpecialFolder_CheckedChanged(object sender, EventArgs e)
         {
             txtCustomFolder.Enabled = !radSpecialFolder.Checked;
             cmbExplorerGuids.Enabled = radSpecialFolder.Checked;
+            if (radCustomFolder.Checked)
+            {
+                UpdateCurrentCache(_explorerCustomItem.CachedShortcutItem);
+            }
+            else
+            {
+                cmbExplorerGuids_SelectedIndexChanged(this, null);
+            }
         }
 
         private void GenerateExplorerShortcut()
         {
-            var targetArguments = radSpecialFolder.Checked
-                ? $"shell:::{cmbExplorerGuids.SelectedValue}"
-                : txtCustomFolder.Text;
+            var targetArguments = ((ExplorerComboBoxItem)cmbExplorerGuids.SelectedItem).BaseItem.ExecutionArgument;
             var workingFolder = radSpecialFolder.Checked ? null : txtCustomFolder.Text;
 
             GenerateFullShortcut(CustomShortcutGetters.ExplorerPath, targetArguments, CustomShortcutType.Explorer,
@@ -344,8 +384,7 @@ namespace TileIconifier.Forms.CustomShortcutForms
 
         private void cmbExplorerGuids_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (cmbExplorerGuids.SelectedIndex >= 0)
-                txtShortcutName.Text = cmbExplorerGuids.Text.CleanInvalidFilenameChars();
+            UpdateCurrentCache(((ExplorerComboBoxItem)cmbExplorerGuids.SelectedItem).CachedShortcutItem);
         }
 
         private void btnExplorerBrowse_Click(object sender, EventArgs e)
@@ -424,10 +463,10 @@ namespace TileIconifier.Forms.CustomShortcutForms
             lstSteamGames.Clear();
             lstSteamGames.Columns.Clear();
 
-            lstSteamGames.Columns.Add("App Id", lstSteamGames.Width/8, HorizontalAlignment.Left);
-            lstSteamGames.Columns.Add("Game Name", lstSteamGames.Width/8*7 + 3, HorizontalAlignment.Left);
+            lstSteamGames.Columns.Add("App Id", lstSteamGames.Width / 8, HorizontalAlignment.Left);
+            lstSteamGames.Columns.Add("Game Name", lstSteamGames.Width / 8 * 7 + 3, HorizontalAlignment.Left);
 
-            lstSteamGames.Items.AddRange(_steamGames.OrderBy(s => s.SteamGameItem.GameName).ToArray<ListViewItem>());
+            lstSteamGames.Items.AddRange(_steamGames.OrderBy(s => s.BaseItem.DisplayName).ToArray<ListViewItem>());
         }
 
         private void LoadSteamGames()
@@ -459,18 +498,23 @@ namespace TileIconifier.Forms.CustomShortcutForms
             if (lstSteamGames.SelectedItems.Count == 0)
                 return;
 
-            var steamGame = ((SteamGameListViewItem) lstSteamGames.SelectedItems[0]).SteamGameItem;
-            UpdatedCacheIcon(steamGame.IconAsBytes);
-            txtShortcutName.Text = steamGame.GameName.CleanInvalidFilenameChars();
+            var steamGameLvi = ((SteamGameListViewItem)lstSteamGames.SelectedItems[0]);
+            UpdateCurrentCache(steamGameLvi.CachedShortcutItem);
+        }
+
+        private void UpdateCurrentCache(CachedShortcutItem cachedShortcutItem)
+        {
+            CurrentCache = cachedShortcutItem;
+            LoadCache();
         }
 
         private void GenerateSteamShortcut()
         {
             if (lstSteamGames.SelectedItems.Count == 0) return;
 
-            var steamGame = ((SteamGameListViewItem) lstSteamGames.SelectedItems[0]).SteamGameItem;
+            var steamGame = ((SteamGameListViewItem)lstSteamGames.SelectedItems[0]).BaseItem;
 
-            GenerateFullShortcut(SteamLibrary.Instance.GetSteamExePath(), steamGame.GameExecutionArgument,
+            GenerateFullShortcut(SteamLibrary.Instance.GetSteamExePath(), steamGame.ExecutionArgument,
                 CustomShortcutType.Steam, steamGame.IconPath);
         }
 
@@ -552,10 +596,10 @@ namespace TileIconifier.Forms.CustomShortcutForms
             lstChromeAppItems.Clear();
             lstChromeAppItems.Columns.Clear();
 
-            lstChromeAppItems.Columns.Add("App Id", lstSteamGames.Width/8*3, HorizontalAlignment.Left);
-            lstChromeAppItems.Columns.Add("App Name", lstSteamGames.Width/8*5 + 3, HorizontalAlignment.Left);
+            lstChromeAppItems.Columns.Add("App Id", lstSteamGames.Width / 8 * 3, HorizontalAlignment.Left);
+            lstChromeAppItems.Columns.Add("App Name", lstSteamGames.Width / 8 * 5 + 3, HorizontalAlignment.Left);
 
-            lstChromeAppItems.Items.AddRange(_chromeApps.OrderBy(a => a.ChromeAppItem.AppName).ToArray<ListViewItem>());
+            lstChromeAppItems.Items.AddRange(_chromeApps.OrderBy(a => a.BaseItem.DisplayName).ToArray<ListViewItem>());
         }
 
         private void lstChromeAppItems_SelectedIndexChanged(object sender, EventArgs e)
@@ -563,18 +607,17 @@ namespace TileIconifier.Forms.CustomShortcutForms
             if (lstChromeAppItems.SelectedItems.Count == 0)
                 return;
 
-            var chromeApp = ((ChromeAppListViewItem) lstChromeAppItems.SelectedItems[0]).ChromeAppItem;
-            UpdatedCacheIcon(chromeApp.IconAsBytes);
-            txtShortcutName.Text = chromeApp.AppName.CleanInvalidFilenameChars();
+            var chromeApp = ((ChromeAppListViewItem)lstChromeAppItems.SelectedItems[0]);
+            UpdateCurrentCache(chromeApp.CachedShortcutItem);
         }
 
         private void GenerateChromeAppShortcut()
         {
             if (lstChromeAppItems.SelectedItems.Count == 0) return;
 
-            var chromeApp = ((ChromeAppListViewItem) lstChromeAppItems.SelectedItems[0]).ChromeAppItem;
+            var chromeApp = ((ChromeAppListViewItem)lstChromeAppItems.SelectedItems[0]).BaseItem;
 
-            GenerateFullShortcut(txtChromeExePath.Text, chromeApp.ChromeAppExecutionArgument,
+            GenerateFullShortcut(txtChromeExePath.Text, chromeApp.ExecutionArgument,
                 CustomShortcutType.ChromeApp, chromeApp.IconPath);
         }
 
@@ -599,7 +642,7 @@ namespace TileIconifier.Forms.CustomShortcutForms
             txtChromeAppPath.Text = fldBrowser.SelectedPath;
         }
         #endregion
-#region Windows Store Methods
+        #region Windows Store Methods
         //*********************************************************************
         // WINDOWS STORE RELATED METHODS
         //*********************************************************************
@@ -651,10 +694,8 @@ namespace TileIconifier.Forms.CustomShortcutForms
         {
             if (lstWindowsStoreApps.SelectedItems.Count == 0) return;
 
-            var windowsStoreAppListViewItem = (WindowsStoreAppListViewItemGroup) lstWindowsStoreApps.SelectedItems[0];
-
-            txtShortcutName.Text = windowsStoreAppListViewItem.Text;
-            UpdatedCacheIcon(ImageUtils.LoadFileToByteArray(windowsStoreAppListViewItem.WindowsStoreApp.LogoPath));
+            var windowsStoreAppListViewItem = (WindowsStoreAppListViewItemGroup)lstWindowsStoreApps.SelectedItems[0];
+            UpdateCurrentCache(windowsStoreAppListViewItem.CachedShortcutItem);
         }
 
         private void GenerateWindowsStoreAppShortcut()
@@ -662,11 +703,11 @@ namespace TileIconifier.Forms.CustomShortcutForms
             if (lstWindowsStoreApps.SelectedItems.Count == 0)
                 return;
 
-            var selectedItem = (WindowsStoreAppListViewItemGroup) lstWindowsStoreApps.SelectedItems[0];
+            var selectedItem = (WindowsStoreAppListViewItemGroup)lstWindowsStoreApps.SelectedItems[0];
 
-            GenerateFullShortcut("explorer.exe", $@"shell:AppsFolder\{selectedItem.WindowsStoreApp.AppUserModelId}",
+            GenerateFullShortcut("explorer.exe", selectedItem.BaseItem.ExecutionArgument,
                 CustomShortcutType.WindowsStoreApp,
-                selectedItem.WindowsStoreApp.LogoPath, windowType: WindowType.Hidden);
+                selectedItem.BaseItem.LogoPath, windowType: WindowType.Hidden);
         }
         #endregion
 
@@ -699,6 +740,16 @@ namespace TileIconifier.Forms.CustomShortcutForms
         {
             GenerateFullShortcut(txtOtherTargetPath.Text, txtOtherShortcutArguments.Text, CustomShortcutType.Other, null);
         }
-#endregion
+        #endregion
+
+        private void txtShortcutName_TextChanged(object sender, EventArgs e)
+        {
+            CurrentCache.ShortcutName = txtShortcutName.Text;
+        }
+
+        private void txtCustomFolder_TextChanged(object sender, EventArgs e)
+        {
+            _explorerCustomItem.BaseItem.SetArgument(txtCustomFolder.Text);
+        }
     }
 }

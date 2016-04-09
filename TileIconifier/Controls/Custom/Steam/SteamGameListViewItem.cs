@@ -28,19 +28,20 @@
 #endregion
 
 using System.Windows.Forms;
+using TileIconifier.Controls.Custom.Cache;
+using TileIconifier.Core.Custom;
 using TileIconifier.Core.Custom.Steam;
+using TileIconifier.Core.Shortcut;
 
 namespace TileIconifier.Controls.Custom.Steam
 {
-    internal class SteamGameListViewItem : ListViewItem
+    internal class SteamGameListViewItem : BaseCustomListViewItem<SteamGame>
     {
-        public SteamGameListViewItem(SteamGame steamGame)
+        public SteamGameListViewItem(SteamGame steamGame) : base(steamGame)
         {
-            SteamGameItem = steamGame;
-            Text = SteamGameItem.AppId;
-            SubItems.Add(SteamGameItem.GameName);
+            Text = BaseItem.AppId;
+            SubItems.Add(BaseItem.DisplayName);
         }
-
-        public SteamGame SteamGameItem { get; set; }
+        
     }
 }

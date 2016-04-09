@@ -44,6 +44,7 @@
             this.radAllUsers.TabStop = true;
             this.radAllUsers.Text = "All Users";
             this.radAllUsers.UseVisualStyleBackColor = true;
+            this.radAllUsers.CheckedChanged += new System.EventHandler(this.radAllUsers_CheckedChanged);
             // 
             // lblHeader
             // 

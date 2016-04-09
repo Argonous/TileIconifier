@@ -34,13 +34,22 @@ using TileIconifier.Core.Utilities;
 
 namespace TileIconifier.Core.Custom.Chrome
 {
-    public class ChromeApp
+    public class ChromeApp : ICustomBaseItem
     {
         public string IconPath { get; set; }
         public string AppId { get; set; }
-        public string AppName { get; set; }
+        public string DisplayName { get; }
 
-        public string ChromeAppExecutionArgument =>
+        public ChromeApp(string appId, string displayName, string iconPath)
+        {
+            AppId = appId;
+            DisplayName = displayName;
+            IconPath = iconPath;
+        }
+
+        public CustomShortcutType ShortcutType => CustomShortcutType.Steam;
+
+        public string ExecutionArgument =>
             $@"--profile-directory=Default --app-id={AppId}";
 
         public byte[] IconAsBytes

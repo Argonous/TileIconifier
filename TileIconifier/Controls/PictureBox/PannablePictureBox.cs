@@ -132,6 +132,8 @@ namespace TileIconifier.Controls.PictureBox
 
         private void PctBox_MouseWheel(object sender, MouseEventArgs e)
         {
+            if (PannablePictureBoxImage.Image == null) return;
+
             if (e.Delta < 0)
             {
                 ShrinkImage();

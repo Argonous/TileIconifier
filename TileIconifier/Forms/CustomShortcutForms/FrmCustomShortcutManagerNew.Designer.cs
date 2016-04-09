@@ -30,6 +30,15 @@ namespace TileIconifier.Forms.CustomShortcutForms
         /// </summary>
         private void InitializeComponent()
         {
+            this.fldBrowser = new System.Windows.Forms.FolderBrowserDialog();
+            this.opnSteamExe = new System.Windows.Forms.OpenFileDialog();
+            this.opnOtherTarget = new System.Windows.Forms.OpenFileDialog();
+            this.opnChromeExe = new System.Windows.Forms.OpenFileDialog();
+            this.iconifierPanel = new TileIconifier.Controls.TileIconifierPanel();
+            this.radShortcutLocation = new TileIconifier.Controls.AllOrCurrentUserRadios();
+            this.txtShortcutName = new System.Windows.Forms.TextBox();
+            this.lblShortcutName = new System.Windows.Forms.Label();
+            this.btnGenerateShortcut = new System.Windows.Forms.Button();
             this.tabShortcutType = new System.Windows.Forms.TabControl();
             this.tabExplorer = new System.Windows.Forms.TabPage();
             this.pnlExplorer = new System.Windows.Forms.Panel();
@@ -60,17 +69,6 @@ namespace TileIconifier.Forms.CustomShortcutForms
             this.lblOtherTargetPath = new System.Windows.Forms.Label();
             this.btnOtherTargetBrowse = new System.Windows.Forms.Button();
             this.txtOtherTargetPath = new System.Windows.Forms.TextBox();
-            this.fldBrowser = new System.Windows.Forms.FolderBrowserDialog();
-            this.opnSteamExe = new System.Windows.Forms.OpenFileDialog();
-            this.txtShortcutName = new System.Windows.Forms.TextBox();
-            this.lblShortcutName = new System.Windows.Forms.Label();
-            this.btnGenerateShortcut = new System.Windows.Forms.Button();
-            this.lblCurrentIcon = new System.Windows.Forms.Label();
-            this.pctCurrentIcon = new System.Windows.Forms.PictureBox();
-            this.opnOtherTarget = new System.Windows.Forms.OpenFileDialog();
-            this.radShortcutLocation = new TileIconifier.Controls.AllOrCurrentUserRadios();
-            this.opnChromeExe = new System.Windows.Forms.OpenFileDialog();
-            this.tileIconifierPanel1 = new TileIconifier.Controls.TileIconifierPanel();
             this.tabShortcutType.SuspendLayout();
             this.tabExplorer.SuspendLayout();
             this.pnlExplorer.SuspendLayout();
@@ -78,8 +76,71 @@ namespace TileIconifier.Forms.CustomShortcutForms
             this.tabChromeApps.SuspendLayout();
             this.tabWindowsStore.SuspendLayout();
             this.tabOther.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pctCurrentIcon)).BeginInit();
             this.SuspendLayout();
+            // 
+            // fldBrowser
+            // 
+            this.fldBrowser.ShowNewFolderButton = false;
+            // 
+            // opnSteamExe
+            // 
+            this.opnSteamExe.FileName = "Steam.exe";
+            this.opnSteamExe.Filter = "Steam.exe|Steam.exe";
+            this.opnSteamExe.Title = "Please locate \"steam.exe\"...";
+            // 
+            // opnOtherTarget
+            // 
+            this.opnOtherTarget.Filter = "All Files|*";
+            // 
+            // opnChromeExe
+            // 
+            this.opnChromeExe.FileName = "chrome.exe";
+            this.opnChromeExe.Filter = "chrome.exe|chrome.exe";
+            this.opnChromeExe.Title = "Please locate \"chrome.exe\"...";
+            // 
+            // iconifierPanel
+            // 
+            this.iconifierPanel.CurrentShortcutItem = null;
+            this.iconifierPanel.Location = new System.Drawing.Point(643, 7);
+            this.iconifierPanel.Name = "iconifierPanel";
+            this.iconifierPanel.Size = new System.Drawing.Size(305, 351);
+            this.iconifierPanel.TabIndex = 31;
+            // 
+            // radShortcutLocation
+            // 
+            this.radShortcutLocation.Location = new System.Drawing.Point(269, 359);
+            this.radShortcutLocation.Name = "radShortcutLocation";
+            this.radShortcutLocation.Size = new System.Drawing.Size(96, 66);
+            this.radShortcutLocation.TabIndex = 30;
+            // 
+            // txtShortcutName
+            // 
+            this.txtShortcutName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.txtShortcutName.Location = new System.Drawing.Point(21, 384);
+            this.txtShortcutName.Name = "txtShortcutName";
+            this.txtShortcutName.Size = new System.Drawing.Size(217, 20);
+            this.txtShortcutName.TabIndex = 29;
+            this.txtShortcutName.TextChanged += new System.EventHandler(this.txtShortcutName_TextChanged);
+            // 
+            // lblShortcutName
+            // 
+            this.lblShortcutName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lblShortcutName.AutoSize = true;
+            this.lblShortcutName.Location = new System.Drawing.Point(18, 368);
+            this.lblShortcutName.Name = "lblShortcutName";
+            this.lblShortcutName.Size = new System.Drawing.Size(81, 13);
+            this.lblShortcutName.TabIndex = 28;
+            this.lblShortcutName.Text = "Shortcut Name:";
+            // 
+            // btnGenerateShortcut
+            // 
+            this.btnGenerateShortcut.Location = new System.Drawing.Point(794, 374);
+            this.btnGenerateShortcut.Name = "btnGenerateShortcut";
+            this.btnGenerateShortcut.Size = new System.Drawing.Size(144, 41);
+            this.btnGenerateShortcut.TabIndex = 27;
+            this.btnGenerateShortcut.Text = "Generate Shortcut";
+            this.btnGenerateShortcut.UseVisualStyleBackColor = true;
+            this.btnGenerateShortcut.Click += new System.EventHandler(this.btnGenerateShortcut_Click);
             // 
             // tabShortcutType
             // 
@@ -91,7 +152,7 @@ namespace TileIconifier.Forms.CustomShortcutForms
             this.tabShortcutType.Location = new System.Drawing.Point(11, 8);
             this.tabShortcutType.Name = "tabShortcutType";
             this.tabShortcutType.SelectedIndex = 0;
-            this.tabShortcutType.Size = new System.Drawing.Size(630, 274);
+            this.tabShortcutType.Size = new System.Drawing.Size(630, 350);
             this.tabShortcutType.TabIndex = 0;
             this.tabShortcutType.SelectedIndexChanged += new System.EventHandler(this.tabShortcutType_SelectedIndexChanged);
             // 
@@ -101,7 +162,7 @@ namespace TileIconifier.Forms.CustomShortcutForms
             this.tabExplorer.Location = new System.Drawing.Point(4, 22);
             this.tabExplorer.Name = "tabExplorer";
             this.tabExplorer.Padding = new System.Windows.Forms.Padding(3);
-            this.tabExplorer.Size = new System.Drawing.Size(622, 248);
+            this.tabExplorer.Size = new System.Drawing.Size(622, 324);
             this.tabExplorer.TabIndex = 0;
             this.tabExplorer.Text = "Explorer";
             this.tabExplorer.UseVisualStyleBackColor = true;
@@ -145,6 +206,7 @@ namespace TileIconifier.Forms.CustomShortcutForms
             this.txtCustomFolder.Name = "txtCustomFolder";
             this.txtCustomFolder.Size = new System.Drawing.Size(413, 20);
             this.txtCustomFolder.TabIndex = 3;
+            this.txtCustomFolder.TextChanged += new System.EventHandler(this.txtCustomFolder_TextChanged);
             // 
             // radCustomFolder
             // 
@@ -479,104 +541,16 @@ namespace TileIconifier.Forms.CustomShortcutForms
             this.txtOtherTargetPath.Size = new System.Drawing.Size(421, 20);
             this.txtOtherTargetPath.TabIndex = 0;
             // 
-            // fldBrowser
-            // 
-            this.fldBrowser.ShowNewFolderButton = false;
-            // 
-            // opnSteamExe
-            // 
-            this.opnSteamExe.FileName = "Steam.exe";
-            this.opnSteamExe.Filter = "Steam.exe|Steam.exe";
-            this.opnSteamExe.Title = "Please locate \"steam.exe\"...";
-            // 
-            // txtShortcutName
-            // 
-            this.txtShortcutName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.txtShortcutName.Location = new System.Drawing.Point(98, 299);
-            this.txtShortcutName.Name = "txtShortcutName";
-            this.txtShortcutName.Size = new System.Drawing.Size(217, 20);
-            this.txtShortcutName.TabIndex = 29;
-            // 
-            // lblShortcutName
-            // 
-            this.lblShortcutName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblShortcutName.AutoSize = true;
-            this.lblShortcutName.Location = new System.Drawing.Point(95, 283);
-            this.lblShortcutName.Name = "lblShortcutName";
-            this.lblShortcutName.Size = new System.Drawing.Size(81, 13);
-            this.lblShortcutName.TabIndex = 28;
-            this.lblShortcutName.Text = "Shortcut Name:";
-            // 
-            // btnGenerateShortcut
-            // 
-            this.btnGenerateShortcut.Location = new System.Drawing.Point(493, 308);
-            this.btnGenerateShortcut.Name = "btnGenerateShortcut";
-            this.btnGenerateShortcut.Size = new System.Drawing.Size(144, 41);
-            this.btnGenerateShortcut.TabIndex = 27;
-            this.btnGenerateShortcut.Text = "Generate Shortcut";
-            this.btnGenerateShortcut.UseVisualStyleBackColor = true;
-            this.btnGenerateShortcut.Click += new System.EventHandler(this.btnGenerateShortcut_Click);
-            // 
-            // lblCurrentIcon
-            // 
-            this.lblCurrentIcon.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblCurrentIcon.AutoSize = true;
-            this.lblCurrentIcon.Location = new System.Drawing.Point(12, 283);
-            this.lblCurrentIcon.Name = "lblCurrentIcon";
-            this.lblCurrentIcon.Size = new System.Drawing.Size(31, 13);
-            this.lblCurrentIcon.TabIndex = 26;
-            this.lblCurrentIcon.Text = "Icon:";
-            // 
-            // pctCurrentIcon
-            // 
-            this.pctCurrentIcon.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.pctCurrentIcon.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pctCurrentIcon.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.pctCurrentIcon.Location = new System.Drawing.Point(15, 299);
-            this.pctCurrentIcon.Name = "pctCurrentIcon";
-            this.pctCurrentIcon.Size = new System.Drawing.Size(50, 50);
-            this.pctCurrentIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pctCurrentIcon.TabIndex = 25;
-            this.pctCurrentIcon.TabStop = false;
-            this.pctCurrentIcon.Click += new System.EventHandler(this.pctCurrentIcon_Click);
-            // 
-            // opnOtherTarget
-            // 
-            this.opnOtherTarget.Filter = "All Files|*";
-            // 
-            // radShortcutLocation
-            // 
-            this.radShortcutLocation.Location = new System.Drawing.Point(391, 283);
-            this.radShortcutLocation.Name = "radShortcutLocation";
-            this.radShortcutLocation.Size = new System.Drawing.Size(96, 66);
-            this.radShortcutLocation.TabIndex = 30;
-            // 
-            // opnChromeExe
-            // 
-            this.opnChromeExe.FileName = "chrome.exe";
-            this.opnChromeExe.Filter = "chrome.exe|chrome.exe";
-            this.opnChromeExe.Title = "Please locate \"chrome.exe\"...";
-            // 
-            // tileIconifierPanel1
-            // 
-            this.tileIconifierPanel1.CurrentShortcutItem = null;
-            this.tileIconifierPanel1.Location = new System.Drawing.Point(643, 7);
-            this.tileIconifierPanel1.Name = "tileIconifierPanel1";
-            this.tileIconifierPanel1.Size = new System.Drawing.Size(305, 351);
-            this.tileIconifierPanel1.TabIndex = 31;
-            // 
             // FrmCustomShortcutManagerNew
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(950, 370);
-            this.Controls.Add(this.tileIconifierPanel1);
+            this.ClientSize = new System.Drawing.Size(950, 427);
+            this.Controls.Add(this.iconifierPanel);
             this.Controls.Add(this.radShortcutLocation);
             this.Controls.Add(this.txtShortcutName);
             this.Controls.Add(this.lblShortcutName);
             this.Controls.Add(this.btnGenerateShortcut);
-            this.Controls.Add(this.lblCurrentIcon);
-            this.Controls.Add(this.pctCurrentIcon);
             this.Controls.Add(this.tabShortcutType);
             this.MinimumSize = new System.Drawing.Size(668, 409);
             this.Name = "FrmCustomShortcutManagerNew";
@@ -593,7 +567,6 @@ namespace TileIconifier.Forms.CustomShortcutForms
             this.tabWindowsStore.ResumeLayout(false);
             this.tabOther.ResumeLayout(false);
             this.tabOther.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pctCurrentIcon)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -617,8 +590,6 @@ namespace TileIconifier.Forms.CustomShortcutForms
         private System.Windows.Forms.TextBox txtShortcutName;
         private System.Windows.Forms.Label lblShortcutName;
         private System.Windows.Forms.Button btnGenerateShortcut;
-        private System.Windows.Forms.Label lblCurrentIcon;
-        private System.Windows.Forms.PictureBox pctCurrentIcon;
         private System.Windows.Forms.TabPage tabOther;
         private System.Windows.Forms.Label lblOtherShortcutArguments;
         private System.Windows.Forms.TextBox txtOtherShortcutArguments;
@@ -641,6 +612,6 @@ namespace TileIconifier.Forms.CustomShortcutForms
         private System.Windows.Forms.TabPage tabWindowsStore;
         private SortableListView lstWindowsStoreApps;
         private System.Windows.Forms.OpenFileDialog opnChromeExe;
-        private TileIconifierPanel tileIconifierPanel1;
+        private TileIconifierPanel iconifierPanel;
     }
 }

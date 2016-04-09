@@ -29,6 +29,7 @@
 
 using System.Windows.Forms;
 using TileIconifier.Core.Custom;
+using TileIconifier.Core.Utilities;
 
 namespace TileIconifier.Controls.Custom
 {
@@ -39,7 +40,7 @@ namespace TileIconifier.Controls.Custom
             CustomShortcut = customShortcut;
             Text = CustomShortcut.ShortcutName;
             SubItems.Add(CustomShortcut.ShortcutType.ToString());
-            SubItems.Add(CustomShortcut.ShortcutItem.ShortcutUser.ToString());
+            SubItems.Add(DirectoryUtils.GetShortcutUserType(CustomShortcut.ShortcutPath).ToString());
         }
 
         public CustomShortcut CustomShortcut { get; }

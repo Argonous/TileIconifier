@@ -35,6 +35,8 @@ namespace TileIconifier.Controls
 {
     public partial class AllOrCurrentUserRadios : UserControl
     {
+        public EventHandler OnRadioButtonCheckedChange;
+
         public AllOrCurrentUserRadios()
         {
             InitializeComponent();
@@ -70,7 +72,16 @@ namespace TileIconifier.Controls
                 case ShortcutUser.CurrentUser:
                     radCurrentUser.Checked = true;
                     break;
+                case ShortcutUser.Unknown:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(radioOption), radioOption, null);
             }
+        }
+
+        private void radAllUsers_CheckedChanged(object sender, EventArgs e)
+        {
+            OnRadioButtonCheckedChange?.Invoke(this, new EventArgs());
         }
     }
 }

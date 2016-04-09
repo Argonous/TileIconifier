@@ -27,20 +27,19 @@
 
 #endregion
 
-using System.Windows.Forms;
+using TileIconifier.Controls.Custom.Cache;
+using TileIconifier.Core.Custom;
 using TileIconifier.Core.Custom.Chrome;
+using TileIconifier.Core.Shortcut;
 
 namespace TileIconifier.Controls.Custom.Chrome
 {
-    internal class ChromeAppListViewItem : ListViewItem
+    internal class ChromeAppListViewItem : BaseCustomListViewItem<ChromeApp>
     {
-        public ChromeAppListViewItem(ChromeApp chromeApp)
+        public ChromeAppListViewItem(ChromeApp chromeApp) : base(chromeApp)
         {
-            ChromeAppItem = chromeApp;
-            Text = chromeApp.AppId;
-            SubItems.Add(chromeApp.AppName);
+            Text = BaseItem.AppId;
+            SubItems.Add(BaseItem.DisplayName);
         }
-
-        public ChromeApp ChromeAppItem { get; set; }
     }
 }

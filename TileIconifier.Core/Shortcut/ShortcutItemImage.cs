@@ -61,6 +61,7 @@ namespace TileIconifier.Core.Shortcut
 
         public void SetImage(byte[] imageBytes, Size shortcutSize, int? x = null, int? y = null)
         {
+            if (imageBytes == null) return;
             var tempImage = ImageUtils.ByteArrayToImage(imageBytes);
 
             //very high resolution images cause GDI+ exceptions, and logos shouldn't need to be this high res anyway

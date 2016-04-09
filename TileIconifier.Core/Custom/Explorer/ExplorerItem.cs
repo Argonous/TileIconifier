@@ -27,42 +27,40 @@
 
 #endregion
 
-using System.Drawing;
-using System.Linq;
-using TileIconifier.Core.Shortcut;
+using TileIconifier.Core.Properties;
 using TileIconifier.Core.Utilities;
 
-namespace TileIconifier.Core.Custom
+namespace TileIconifier.Core.Custom.Explorer
 {
-    public class NewCustomShortcutFormCache
+    public class ExplorerItem : ICustomBaseItem
     {
-        //private byte[] _currentIconBytes;
+        public ExplorerItem(string displayName, string guid)
+        {
+            Guid = guid;
+            DisplayName = displayName;
+            
+        }
 
-        //private Image _iconCache;
-        //private byte[] _newIconBytes;
+        private string _customArgument;
+        public string Guid { get; }
+        public string DisplayName { get; }
+        public string ExecutionArgument => !string.IsNullOrEmpty(Guid) ? $"shell:::{Guid}" : _customArgument ;
 
-        public ShortcutItem ShortcutItem { get; set; }
-        public string ShortcutName { get; set; }
-        public ShortcutUser AllOrCurrentUser { get; set; }
+        public void SetArgument(string argument)
+        {
+            _customArgument = argument;
+        }
 
-        //public void SetIconBytes(byte[] bytes)
-        //{
-        //    _currentIconBytes = _currentIconBytes ?? bytes;
-        //    _newIconBytes = bytes;
-        //}
 
-        //public Image GetIcon()
-        //{
-        //    var iconBytesChanged = (_currentIconBytes != null && _newIconBytes != null &&
-        //                            !_currentIconBytes.SequenceEqual(_newIconBytes)) ||
-        //                           _currentIconBytes != null && _newIconBytes == null;
+        public byte[] IconAsBytes
+        {
+            get
+            {
+                using (var tempBitmap = Resources.explorer_ICO_MYCOMPUTER.ToBitmap())
+                    return ImageUtils.ImageToByteArray(tempBitmap);
+            }
+        }
 
-        //    if (_iconCache != null && !iconBytesChanged) return _iconCache;
-
-        //    _currentIconBytes = _newIconBytes?.ToArray();
-        //    _iconCache?.Dispose();
-        //    _iconCache = ImageUtils.ByteArrayToImage(_currentIconBytes);
-        //    return _iconCache;
-        //}
+        public CustomShortcutType ShortcutType => CustomShortcutType.Explorer;
     }
 }

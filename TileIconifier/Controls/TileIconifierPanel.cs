@@ -61,6 +61,7 @@ namespace TileIconifier.Controls
 
         public void UpdateControlsToShortcut()
         {
+            if (CurrentShortcutItem == null) return;
             //disable event handlers whilst updating things programatically
             RemoveEventHandlers();
 
@@ -163,7 +164,7 @@ namespace TileIconifier.Controls
             byte[] imageBytes;
             try
             {
-                imageBytes = FrmIconSelector.GetImage(this, CurrentShortcutItem.TargetFilePath);
+                imageBytes = FrmIconSelector.GetImage(this, CurrentShortcutItem?.TargetFilePath);
             }
             catch (UserCancellationException)
             {

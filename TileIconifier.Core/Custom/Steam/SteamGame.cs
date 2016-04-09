@@ -35,19 +35,19 @@ using TileIconifier.Core.Utilities;
 
 namespace TileIconifier.Core.Custom.Steam
 {
-    public class SteamGame
+    public class SteamGame : ICustomBaseItem
     {
         private string _iconPath;
 
-        public SteamGame(string appId, string gameName, string appManifestPath)
+        public SteamGame(string appId, string displayName, string appManifestPath)
         {
             AppId = appId;
-            GameName = gameName;
+            DisplayName = displayName;
             AppManifestPath = appManifestPath;
         }
 
         public string AppId { get; }
-        public string GameName { get; }
+        public string DisplayName { get; }
         public string AppManifestPath { get; private set; }
 
         public string IconPath
@@ -86,7 +86,9 @@ namespace TileIconifier.Core.Custom.Steam
             }
         }
 
-        public string GameExecutionArgument => $"-applaunch \"{AppId}\"";
+        public CustomShortcutType ShortcutType => CustomShortcutType.Steam;
+
+        public string ExecutionArgument => $"-applaunch \"{AppId}\"";
 
         public override string ToString()
         {

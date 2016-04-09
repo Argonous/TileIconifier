@@ -34,6 +34,8 @@ using System.Linq;
 using System.Windows.Forms;
 using TileIconifier.Controls.Custom;
 using TileIconifier.Core.Custom;
+using TileIconifier.Core.Shortcut;
+using TileIconifier.Core.Utilities;
 using TileIconifier.Properties;
 using TileIconifier.Utilities;
 
@@ -51,7 +53,7 @@ namespace TileIconifier.Forms.CustomShortcutForms
 
         private void RefreshCustomShortcuts()
         {
-            var customShortcuts = LoadCustomShortcuts();
+            var customShortcuts = CustomShortcutLibrary.GetCustomShortcuts(false);
             _customShortcutsList = customShortcuts.Select(c => new CustomShortcutListViewItem(c)).ToList();
             lstCustomShortcuts.Clear();
             lstCustomShortcuts.Columns.Clear();
@@ -63,8 +65,9 @@ namespace TileIconifier.Forms.CustomShortcutForms
             var smallImageList = new ImageList();
             for (var i = 0; i < _customShortcutsList.Count; i++)
             {
-                smallImageList.Images.Add(_customShortcutsList[i].CustomShortcut.ShortcutItem.MediumImage() ??
-                                          (_customShortcutsList[i].CustomShortcut.ShortcutItem.StandardIcon ??
+                var shortcutItem = new ShortcutItem(_customShortcutsList[i].CustomShortcut.ShortcutPath);
+                smallImageList.Images.Add(shortcutItem.MediumImage() ??
+                                          (shortcutItem.StandardIcon ??
                                            Resources.QuestionMark));
                 _customShortcutsList[i].ImageIndex = i;
                 lstCustomShortcuts.Items.Add(_customShortcutsList[i]);
@@ -79,19 +82,6 @@ namespace TileIconifier.Forms.CustomShortcutForms
 
         private void frmCustomShortcutManagerMain_Load(object sender, EventArgs e)
         {
-        }
-
-        private static IEnumerable<CustomShortcut> LoadCustomShortcuts()
-        {
-            if (!Directory.Exists(CustomShortcutGetters.CustomShortcutVbsPath))
-                return new List<CustomShortcut>();
-
-            //get all VBS files built by TileIconifier
-            return new DirectoryInfo(CustomShortcutGetters.CustomShortcutVbsPath)
-                .GetFiles("*.vbs", SearchOption.AllDirectories)
-                .Select(vbsFile => CustomShortcut.Load(vbsFile.FullName))
-                .Where(customShortcut => customShortcut.ShortcutItem.ShortcutUser != ShortcutUser.Unknown)
-                .ToList();
         }
 
         private void btnCreateNewShortcut_Click(object sender, EventArgs e)

@@ -105,6 +105,10 @@
     <Compile Include="Controls\AllOrCurrentUserRadios.Designer.cs">
       <DependentUpon>AllOrCurrentUserRadios.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Custom\Cache\BaseCustomListViewItem.cs" />
+    <Compile Include="Controls\Custom\Cache\BaseGenericCustomControlItem.cs" />
+    <Compile Include="Controls\Custom\Cache\CachedShortcutItem.cs" />
+    <Compile Include="Controls\Custom\Explorer\ExplorerComboBoxItem.cs" />
     <Compile Include="Controls\Custom\WindowsStoreShellMethod\WindowsStoreAppListViewItemGroup.cs" />
     <Compile Include="Controls\PictureBox\PannablePictureBox.cs">
       <SubType>UserControl</SubType>

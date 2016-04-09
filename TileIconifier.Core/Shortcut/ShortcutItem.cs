@@ -46,7 +46,8 @@ namespace TileIconifier.Core.Shortcut
         private byte[] _smallImageCacheBytes;
         private Bitmap _standardIcon;
 
-        [NonSerialized] public ShortcutItemStateController Properties = new ShortcutItemStateController();
+        [NonSerialized]
+        public ShortcutItemStateController Properties = new ShortcutItemStateController();
 
         public ShortcutItem(FileInfo shortcutFileInfo)
         {
@@ -64,20 +65,16 @@ namespace TileIconifier.Core.Shortcut
                 SmallImageResizeMetadataPath, TargetFolderPath);
         }
 
+        public ShortcutItem()
+        {
+            IsPinned = null;
+
+        }
+
         public bool IsTileIconifierCustomShortcut => new DirectoryInfo(TargetFolderPath).Parent?.FullName + "\\" ==
                                                      CustomShortcutGetters.CustomShortcutVbsPath;
 
-        public ShortcutUser ShortcutUser
-        {
-            get
-            {
-                if (ShortcutFileInfo.FullName.StartsWith(CustomShortcutGetters.CustomShortcutAllUsersPath))
-                    return ShortcutUser.AllUsers;
-                if (ShortcutFileInfo.FullName.StartsWith(CustomShortcutGetters.CustomShortcutCurrentUserPath))
-                    return ShortcutUser.CurrentUser;
-                return ShortcutUser.Unknown;
-            }
-        }
+        public ShortcutUser ShortcutUser => DirectoryUtils.GetShortcutUserType(ShortcutFileInfo?.FullName);
 
         public bool IsValidForIconification => !string.IsNullOrEmpty(TargetFilePath) && File.Exists(TargetFilePath);
 
@@ -93,7 +90,8 @@ namespace TileIconifier.Core.Shortcut
                 if (_standardIcon != null) return _standardIcon;
                 try
                 {
-                    _standardIcon = Icon.ExtractAssociatedIcon(ShortcutFileInfo.FullName)?.ToBitmap();
+                    if (ShortcutFileInfo != null)
+                        _standardIcon = Icon.ExtractAssociatedIcon(ShortcutFileInfo.FullName)?.ToBitmap();
                 }
                 catch
                 {
@@ -103,8 +101,15 @@ namespace TileIconifier.Core.Shortcut
             }
         }
 
+        private FileInfo _shortcutFileInfo;
+        public FileInfo ShortcutFileInfo
+        {
+            get { return _shortcutFileInfo;}
+            set { _targetFilePath = null;
+                _shortcutFileInfo = value;
+            }
+        }
 
-        public FileInfo ShortcutFileInfo { get; set; }
         public string AppId { get; set; }
         public bool? IsPinned { get; set; }
 
@@ -144,7 +149,7 @@ namespace TileIconifier.Core.Shortcut
         {
             get
             {
-                if (string.IsNullOrEmpty(_targetFilePath))
+                if (string.IsNullOrEmpty(_targetFilePath) && ShortcutFileInfo != null)
                     _targetFilePath = ShortcutUtils.ResolveShortcut(ShortcutFileInfo.FullName);
                 return
                     Environment.ExpandEnvironmentVariables("%PATHEXT%").Split(';').Any(
